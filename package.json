@@ -11,8 +11,8 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.32.1",
     "@libsql/client": "^0.14.0",
+    "openai": "^4.73.0",
     "drizzle-orm": "^0.38.2",
     "next": "16.0.7",
     "react": "19.2.0",

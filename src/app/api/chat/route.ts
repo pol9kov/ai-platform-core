@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 import { createMessage, listMessages } from '@/lib/messages'
 import { searchThoughts } from '@/lib/thoughts'
 
-const anthropic = new Anthropic()
+const openai = new OpenAI()
 
 // POST /api/chat
 export async function POST(request: NextRequest) {
@@ -36,25 +36,27 @@ export async function POST(request: NextRequest) {
         .join('\n')}\n\nUse this context to inform your responses when relevant.`
     }
 
-    // Build messages for Anthropic
-    const anthropicMessages = history.map(msg => ({
-      role: msg.role as 'user' | 'assistant',
-      content: msg.content,
-    }))
+    // Build messages for OpenAI
+    const openaiMessages: OpenAI.ChatCompletionMessageParam[] = [
+      {
+        role: 'system',
+        content: `You are a helpful AI assistant in a knowledge management platform. Help the user organize and explore their thoughts.${contextPrompt}`,
+      },
+      ...history.map(msg => ({
+        role: msg.role as 'user' | 'assistant',
+        content: msg.content,
+      })),
+    ]
 
-    // Call Anthropic API
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      system: `You are a helpful AI assistant in a knowledge management platform. Help the user organize and explore their thoughts.${contextPrompt}`,
-      messages: anthropicMessages,
+    // Call OpenAI API
+    const response = await openai.chat.completions.create({
+      model: 'gpt-5-nano',
+      max_completion_tokens: 1024,
+      messages: openaiMessages,
     })
 
     // Extract response text
-    const assistantContent = response.content
-      .filter(block => block.type === 'text')
-      .map(block => block.text)
-      .join('')
+    const assistantContent = response.choices[0]?.message?.content || ''
 
     // Save assistant message
     const assistantMessage = await createMessage(spaceId, 'assistant', assistantContent)
