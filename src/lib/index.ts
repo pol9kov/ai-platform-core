@@ -24,3 +24,10 @@ export {
   deleteThought
 } from './thoughts'
 export type { Thought, NewThought } from './thoughts'
+
+export {
+  createMessage,
+  listMessages,
+  deleteMessages
+} from './messages'
+export type { Message, NewMessage } from './messages'
