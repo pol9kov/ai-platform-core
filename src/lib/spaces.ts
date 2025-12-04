@@ -6,6 +6,7 @@ import { getUserId } from './auth'
 export interface Space {
   id: string
   name: string
+  plugins: string[]
   createdAt: number
 }
 
@@ -23,13 +24,14 @@ export function getSpaces(): Space[] {
   return data ? JSON.parse(data) : []
 }
 
-export function createSpace(name: string): Space {
+export function createSpace(name: string, plugins: string[] = []): Space {
   const userId = getUserId()
   const spaces = getSpaces()
 
   const space: Space = {
     id: crypto.randomUUID(),
     name,
+    plugins,
     createdAt: Date.now()
   }
 

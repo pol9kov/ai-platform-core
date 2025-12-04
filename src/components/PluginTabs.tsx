@@ -3,36 +3,60 @@
 import { useEffect, useState, ComponentType } from 'react'
 import { plugins } from '@/lib/plugins'
 import { events } from '@/lib/events'
+import { getCurrentSpace } from '@/lib/spaces'
+import { registerPlugins } from '@/lib/builtin-plugins'
 
 interface PluginWithView {
   name: string
   SpaceView: ComponentType
 }
 
-function getInitialViews(): PluginWithView[] {
-  return plugins.getComponents() as PluginWithView[]
-}
-
 export function PluginTabs() {
-  const [pluginViews, setPluginViews] = useState<PluginWithView[]>(getInitialViews)
-  const [activeTab, setActiveTab] = useState<string | null>(() => {
-    const views = getInitialViews()
-    return views.length > 0 ? views[0].name : null
-  })
+  const [pluginViews, setPluginViews] = useState<PluginWithView[]>([])
+  const [activeTab, setActiveTab] = useState<string | null>(null)
+  const [spacePlugins, setSpacePlugins] = useState<string[]>([])
 
+  // Load plugins when space changes
   useEffect(() => {
-    const unsub = events.on('plugin:loaded', () => {
-      const views = plugins.getComponents() as PluginWithView[]
-      setPluginViews(views)
-      setActiveTab(prev => prev ?? (views.length > 0 ? views[0].name : null))
+    async function loadSpacePlugins() {
+      const space = getCurrentSpace()
+      const pluginNames = space?.plugins || []
+      setSpacePlugins(pluginNames)
+
+      // Register plugins for this space
+      await registerPlugins(pluginNames)
+
+      // Get plugin views
+      const allViews = plugins.getComponents() as PluginWithView[]
+      const filteredViews = allViews.filter(p => pluginNames.includes(p.name))
+      setPluginViews(filteredViews)
+      setActiveTab(filteredViews[0]?.name || null)
+    }
+
+    loadSpacePlugins()
+
+    const unsub = events.on('space:selected', () => {
+      loadSpacePlugins()
     })
+
     return () => unsub()
   }, [])
+
+  // Update when plugins are loaded
+  useEffect(() => {
+    const unsub = events.on('plugin:loaded', () => {
+      const allViews = plugins.getComponents() as PluginWithView[]
+      const filteredViews = allViews.filter(p => spacePlugins.includes(p.name))
+      setPluginViews(filteredViews)
+      setActiveTab(prev => prev ?? (filteredViews[0]?.name || null))
+    })
+    return () => unsub()
+  }, [spacePlugins])
 
   if (pluginViews.length === 0) {
     return (
       <div className="h-full flex items-center justify-center text-neutral-500">
-        No plugins loaded
+        No plugins enabled for this space
       </div>
     )
   }

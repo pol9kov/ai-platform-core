@@ -1,6 +1,31 @@
-import { plugins } from '../plugins'
+import { plugins, PluginManifest } from '../plugins'
 import { chatManifest } from './chat'
 
+// All available plugins
+export const availablePlugins: PluginManifest[] = [
+  chatManifest,
+]
+
+// Get list of available plugin names
+export function getAvailablePluginNames(): string[] {
+  return availablePlugins.map(p => p.name)
+}
+
+// Register specific plugins by name
+export async function registerPlugins(pluginNames: string[]) {
+  for (const name of pluginNames) {
+    const manifest = availablePlugins.find(p => p.name === name)
+    if (manifest && !plugins.get(name)) {
+      await plugins.register(manifest)
+    }
+  }
+}
+
+// Register all builtin plugins (for backwards compatibility)
 export async function registerBuiltinPlugins() {
-  await plugins.register(chatManifest)
+  for (const manifest of availablePlugins) {
+    if (!plugins.get(manifest.name)) {
+      await plugins.register(manifest)
+    }
+  }
 }
