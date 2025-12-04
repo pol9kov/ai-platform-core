@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createMessage, listMessages } from '@/lib/messages'
-import { completeWithThoughts } from '@/lib/builtin-plugins/thoughts'
+import { completeWithThoughts } from '@/lib/builtin-plugins/thoughts-service'
 
 // POST /api/chat
 export async function POST(request: NextRequest) {
