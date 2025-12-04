@@ -5,11 +5,20 @@ import { completeWithThoughts } from '@/lib/builtin-plugins/thoughts-service'
 // POST /api/chat
 export async function POST(request: NextRequest) {
   const body = await request.json()
-  const { spaceId, content } = body
+  const { spaceId, content, plugins } = body
 
   if (!spaceId || !content) {
     return NextResponse.json(
       { error: 'spaceId and content required' },
+      { status: 400 }
+    )
+  }
+
+  // Check if Thoughts plugin is enabled for this space
+  const hasThoughts = plugins?.includes('Thoughts')
+  if (!hasThoughts) {
+    return NextResponse.json(
+      { error: 'Thoughts plugin is required for AI chat. Enable it for this space.' },
       { status: 400 }
     )
   }
@@ -21,7 +30,7 @@ export async function POST(request: NextRequest) {
     // Get conversation history
     const history = await listMessages(spaceId)
 
-    // AI completion - delegated to thoughts plugin
+    // AI completion - provided by Thoughts plugin
     const assistantContent = await completeWithThoughts(spaceId, content, history)
 
     // Save assistant message

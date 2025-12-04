@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef, FormEvent } from 'react'
-import { getCurrentSpaceId } from '@/lib/spaces'
+import { getCurrentSpaceId, getCurrentSpace } from '@/lib/spaces'
 import { events } from '@/lib/events'
 
 interface Message {
@@ -68,10 +68,11 @@ export function ChatView() {
     setMessages(prev => [...prev, tempUserMsg])
 
     try {
+      const space = getCurrentSpace()
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ spaceId, content: userContent }),
+        body: JSON.stringify({ spaceId, content: userContent, plugins: space?.plugins }),
       })
 
       if (res.ok) {
