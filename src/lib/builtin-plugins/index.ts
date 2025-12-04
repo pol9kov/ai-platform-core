@@ -1,8 +1,10 @@
 import { plugins, PluginManifest } from '../plugins'
 import { chatManifest } from './chat'
+import { thoughtsManifest } from './thoughts'
 
 // All available plugins
 export const availablePlugins: PluginManifest[] = [
+  thoughtsManifest,  // Thoughts first - provides ai:complete handler
   chatManifest,
 ]
 
