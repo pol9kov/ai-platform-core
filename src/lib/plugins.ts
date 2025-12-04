@@ -5,7 +5,9 @@ export interface PluginManifest {
   name: string
   version?: string
   depends?: string[]
+  optional?: string[]
   emits?: string[]
+  listens?: string[]
   handles?: string[]
   components?: {
     SpaceView?: ComponentType

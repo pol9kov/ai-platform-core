@@ -16,3 +16,11 @@ export {
   getCurrentSpace
 } from './spaces'
 export type { Space } from './spaces'
+
+export {
+  createThought,
+  listThoughts,
+  searchThoughts,
+  deleteThought
+} from './thoughts'
+export type { Thought, NewThought } from './thoughts'
